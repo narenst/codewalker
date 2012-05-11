@@ -1,0 +1,57 @@
+<html>
+  <script src='lib/jquery-1.7.1.min.js'></script>
+  <script src='lib/bootstrap.min.js'></script>
+  <script src="http://localhost:9000/socket.io/socket.io.js"></script>
+
+  <script>
+
+    function goToUrl(url) {
+      console.log("going to www.google.com");
+       chrome.tabs.executeScript(
+         null, {code:"window.location.href='" + url + "'"}
+       );
+    }
+
+    var socket = io.connect('http://localhost:9000');
+    var masterSelected = false;
+    var imMaster = false;
+
+    // on connection to server
+    socket.on('connect', function(){
+      console.log("connected to nodejs server");
+    });
+
+    // update from server
+    socket.on('update', function (username, data) {
+      console.log("receiving data " + data);
+      //goToUrl(data);
+      $('#synctext').val(data);
+    });
+
+    // master chosen
+    socket.on('masterSelected', function (isMasterSelected) {
+      console.log("incoming master selected message");
+      //$('#status').html('masterselected : ' + isMasterSelected);
+      //imMaster = $('#type_master').attr('checked');
+      masterSelected = isMasterSelected;
+    });
+
+    //send to server
+    function sendUpdateData(data) {
+      console.log("sending data : " + data);
+      socket.emit('sendupdate', data);
+    }
+
+    function masterSelected() {
+      console.log("selected master");
+      imMaster = true;
+      socket.emit('selectMaster', "dummy");
+    }
+
+    function padawanSelected() {
+      console.log("cleared master");
+      imMaster = false;
+      socket.emit('clearMaster', "dummy");
+    }
+  </script>
+</html>

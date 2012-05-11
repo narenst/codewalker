@@ -14,20 +14,21 @@
       <button type="submit" value="submit">Go To Google</button>
     </form>
 
-    <form action="javascript:syncData();" id="syncData">
-      <input class="input-large" type="text" id="synctext" placeholder="Text to sync"/>
-      <button type="submit" value="submit">Sync</button>
-      <select class="span2" id="type">
-        <option>Master</option>
-        <option>Jedi</option>
-      </select>
-    </form>
+    <input class="input-large" type="text" id="synctext" placeholder="Text to sync"/>
+    <button type="submit" value="submit" id="sync">Sync</button>
+
+    <br><br>
+
+    <input type="radio" name="type" value="Master" id="type_master"/> Master 
+    <input type="radio" name="type" value="Padawan" id="type_padawan" checked="checked"/> Padawan
+    <br>
+
     <h4 id="status"></h4>
   </body>
 
-  <script type="text/javascript" src="https://js.simperium.com/v0.1/"></script>
   <script src='lib/jquery-1.7.1.min.js'></script>
   <script src='lib/bootstrap.min.js'></script>
+  <script src="http://localhost:9000/socket.io/socket.io.js"></script>
 
   <script>
     var accessToken;
@@ -39,6 +40,62 @@
        );
     }
 
+    var socket = io.connect('http://localhost:9000');
+    var masterSelected = false;
+    var imMaster = false;
+
+    // on connection to server
+    socket.on('connect', function(){
+      console.log("connected to nodejs server");
+    });
+
+    // update from server
+    socket.on('update', function (username, data) {
+      console.log("receiving data " + data);
+      $('#synctext').val(data);
+    });
+
+    // master chosen
+    socket.on('masterSelected', function (isMasterSelected) {
+      console.log("incoming master selected message");
+      $('#status').html('masterselected : ' + isMasterSelected);
+      imMaster = $('#type_master').attr('checked');
+
+      if (isMasterSelected && !imMaster) {
+        //im the padawan
+        $('#type_master').attr('disabled', true);
+        $('#type_padawan').attr('disabled', true);
+      } else {
+        //no body is master
+        $('#type_master').attr('disabled', false);
+        $('#type_padawan').attr('disabled', false);
+      }
+
+      //start syncing
+      if (isMasterSelected && imMaster) {
+        $('#sync').attr('disabled', false);
+      } else {
+        $('#sync').attr('disabled', true);
+      }
+    });
+
+    //send to server
+    $('#sync').click(function() {
+      console.log("sending data " + $('#synctext').val());
+      socket.emit('sendupdate', $('#synctext').val());
+    });
+
+    $('#type_master').click(function() {
+      console.log("selected master");
+      socket.emit('selectMaster', "dummy");
+    });
+
+    $('#type_padawan').click(function() {
+      console.log("cleared master");
+      socket.emit('clearMaster', "dummy");
+    });
+
+    /*
     function getTokenFromSimperium() {
       authorizeUrl = "https://auth.simperium.com/1/fork-programs-2e6/authorize/";
       $.ajax(
@@ -81,11 +138,7 @@
         return $('#synctext').val();
     });
 
-    function syncData() {
-      bucket.update("temp");
-    }
-
     bucket.start();
-
+    */
   </script>
 </html>

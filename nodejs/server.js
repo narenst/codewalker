@@ -3,19 +3,64 @@ var io = require('socket.io').listen(app);
 
 app.listen(9000);
 
-// routing
-app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/index.html');
+app.all('/*', function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next();
 });
 
+// // routing
+// app.all('/', function (req, res) {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header("Access-Control-Allow-Headers", "X-Requested-With");
+//   res.sendfile(__dirname + '/index.html');
+// });
+
+var masterSelected = false;
+var master = null;
 
 io.sockets.on('connection', function (socket) {
 
    // when the master sends 'sendupdate', this listens and executes
    socket.on('sendupdate', function (data) {
-      // we tell the client to execute 'update' with 2 parameters
+      console.log("received update from client : " + data);
       io.sockets.emit('update', "master", data);
    });
+
+   //the master is selected
+   socket.on('selectMaster', function (data) {
+      console.log("received selectMaster : " + data);
+      if (!masterSelected) {
+         setMaster(socket);
+      }
+   });
+
+   socket.on('clearMaster', function (data) {
+      console.log("received clearMaster : " + data);
+      if (masterSelected) {
+         clearMaster();
+      }
+   });
+
+   function broadcastMasterStatus() {
+      console.log("broadcasting masterSelected : " + masterSelected);
+      io.sockets.emit('masterSelected', masterSelected);
+   }
+
+   function setMaster(socket) {
+      masterSelected = true;
+      master = socket;
+      broadcastMasterStatus();
+   }
+
+   function clearMaster() {
+      master = null;
+      masterSelected = false;
+      broadcastMasterStatus();
+   }   
+
+   //new client joined
+   broadcastMasterStatus();
    
    /*
    // when the client emits 'adduser', this listens and executes
@@ -31,15 +76,12 @@ io.sockets.on('connection', function (socket) {
       // update the list of users in chat, client-side
       io.sockets.emit('updateusers', usernames);
    });
+   */
 
    // when the user disconnects.. perform this
    socket.on('disconnect', function(){
-      // remove the username from global usernames list
-      delete usernames[socket.username];
-      // update list of users in chat, client-side
-      io.sockets.emit('updateusers', usernames);
-      // echo globally that this client has left
-      socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
+      if (socket == master) {
+         clearMaster();
+      }
    });
-   */
 });
