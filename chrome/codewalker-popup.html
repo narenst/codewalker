@@ -6,20 +6,86 @@
         width: 300px;
       }
     </style>
+    <link rel="stylesheet" type="text/css" href="bootstrap.min.css"/>
   </head>
+  <script type="text/javascript" src="https://js.simperium.com/v0.1/"></script>
   <body>
     <h2>Settings</h2>
     <form action="javascript:goToUrl();" id="goToUrl">
       <button type="submit" value="submit">Go To Google</button>
     </form>
+
+    <form action="javascript:syncData();" id="syncData">
+      <input class="input-large" type="text" id="synctext" placeholder="Text to sync"/>
+      <button type="submit" value="submit">Sync</button>
+      <select class="span2" id="type">
+        <option>Master</option>
+        <option>Jedi</option>
+      </select>
+    </form>
+    <h4 id="status"></h4>
   </body>
 
+  <script src='lib/jquery-1.7.1.min.js'></script>
+  <script src='lib/bootstrap.min.js'></script>
+
   <script>
+    var accessToken;
+
     function goToUrl() {
       console.log("going to www.google.com");
        chrome.tabs.executeScript(
          null, {code:"window.location.href='http://www.google.com'"}
        );
     }
+
+    function getTokenFromSimperium() {
+      authorizeUrl = "https://auth.simperium.com/1/fork-programs-2e6/authorize/";
+      $.ajax(
+        {
+          type:"POST",
+          url:authorizeUrl,
+          data:"username=demo@locationlabs.com&password=demo",
+          headers:{"X-Simperium-API-Key": "d06073458ad64f288e85a260338def7b"},
+          success : function(result) {
+            console.log("result : " + result);
+            json = JSON.parse(result);
+            $('#status').html("simperium token : " + json.access_token);
+            return json.access_token;
+          },
+          error:function (xhr, ajaxOptions, thrownError){
+            $('#status').html("failure : " + xhr.responseText);
+            console.log(xhr.status);
+            console.log(xhr.responseText);
+          }
+        }
+      );
+    }
+
+    accessToken = getTokenFromSimperium();
+
+    var simperium = new Simperium('fork-programs-2e6', { token : accessToken});
+    var bucket = simperium.bucket('status');
+
+    bucket.on('notify', function(id, data) {
+        console.log("object " + id + " was updated!");
+        $('#status').html("object " + id + " was updated!");
+        console.log("new data is:");
+        console.log(data);
+        $('#synctext').val(data);
+    });
+
+    bucket.on('local', function(id) {
+        console.log("request for local state for object " + id + " received");
+        $('#status').html("request for local state for object " + id + " received");
+        return $('#synctext').val();
+    });
+
+    function syncData() {
+      bucket.update("temp");
+    }
+
+    bucket.start();
+
   </script>
 </html>
