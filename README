@@ -1,0 +1,8 @@
+This is a Chrome Plugin to help two users look at same piece of code. One browser will become the 'master' and the other a 'slave'.
+
+1. Once a session is setup, the slave loses the control of the browser tab.
+2. Any url that the master goes to is sent to the slave and the page is opened there.
+3. Also the top of the page is shared (so they both look at the same part of the page)
+4. Any text highlighted is also sent across.
+
+These are the starting goals of the hack. Time permitting, more can be done.
