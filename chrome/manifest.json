@@ -6,7 +6,7 @@
       "128":"images/128.png"
    },
    "permissions":[
-      "tabs", "http://*/*", "https://*/*"
+      "tabs", "http://*/*", "https://*/*", "https://api.simperium.com/sock/info"
    ],
    "content_scripts": [{
        "matches":["https://*/*"],
