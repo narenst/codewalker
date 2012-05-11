@@ -10,9 +10,6 @@
   
   <body>
     <h2>Settings</h2>
-    <form action="javascript:goToUrl();" id="goToUrl">
-      <button type="submit" value="submit">Go To Google</button>
-    </form>
 
     <input class="input-large" type="text" id="synctext" placeholder="Text to sync"/>
     <button type="submit" value="submit" id="sync">Sync</button>
@@ -59,7 +56,11 @@
 
       //fix checked 
       if (isMasterSelected) {
-        $('#type_master').attr('checked','');
+        if (imMaster) {
+          $('#type_master').attr('checked','checked');
+        } else {
+          $('#type_padawan').attr('checked','checked');
+        }
       }
 
       //send to server

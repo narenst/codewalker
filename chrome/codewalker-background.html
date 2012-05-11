@@ -39,6 +39,7 @@
       //$('#status').html('masterselected : ' + isMasterSelected);
       //imMaster = $('#type_master').attr('checked');
       masterSelected = isMasterSelected;
+      renderPopUp();
     });
 
     //send to server
@@ -63,6 +64,14 @@
       imMaster = false;
       socket.emit('clearMaster', "dummy");
       stopWatchingBrowser();
+    }
+
+    function renderPopUp() {
+      var popups = chrome.extension.getViews({type: "popup"});
+      if (popups.length != 0) {
+        var popup = popups[0];
+        popup.renderView();
+      }
     }
 
     function getMasterSelected() {
