@@ -13,6 +13,13 @@
       });
     }
 
+    function highlight(jquerypath) {
+      console.log("going to " + jquerypath);
+      chrome.tabs.getSelected(null, function (tab) {
+        chrome.tabs.sendRequest(tab.id, {"jquerypath":jquerypath});
+      });
+    }
+
     var socket = io.connect('http://vivid-rain-8658.herokuapp.com');
     var masterSelected = false;
     var imMaster = false;
@@ -30,7 +37,13 @@
 
       //padawan
       if (masterSelected && !imMaster) {
-        goToUrl(data);
+        if (data.indexOf("sleepydragon") != -1) {
+          data = data.replace("sleepydragon:", "");
+          console.log(data);
+          highlight(data);
+        } else {
+          goToUrl(data);
+        }
       }
       syncText = data;
     });
@@ -62,6 +75,10 @@
           lastKnownUrl = tab.url;
           sendUpdateData(lastKnownUrl);
         }
+        });
+
+        chrome.extension.onRequest.addListener(function(request, sender) {
+          sendUpdateData("sleepydragon:" + request);
         });
     }
 
@@ -99,12 +116,14 @@
       return syncText;
     }
 
-    chrome.contextMenus.create({title: "Take padawan here", contexts:["selection"], onclick: function(info, tab) {
-        //sendSearch(info.selectionText);
-        console.log(info.selectionText);
-        console.log(info);
-      }
-    });
+    // chrome.contextMenus.create({title: "Take padawan here", contexts:["selection"], onclick: function(info, tab) {
+    //     //sendSearch(info.selectionText);
+    //     console.log(info.selectionText);
+    //     console.log(info);
+    //   }
+    // });
+
+    // console.log("done");
 
   </script>
 </html>

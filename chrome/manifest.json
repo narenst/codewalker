@@ -10,8 +10,8 @@
    ],
    "content_scripts": [{
        "matches":["http://*/*", "https://*/*", "ftp://*/*", "file://*/*"],
-       "js": ["lib/jquery-1.7.1.min.js"],
-       "run_at": "document_start"
+       "js": ["lib/jquery-1.7.1.min.js", "type-ahead.js"],
+       "run_at": "document_idle"
    }],
    "browser_action": {
          "default_title": "Codewalker",

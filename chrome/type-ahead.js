@@ -1,53 +1,33 @@
-function findText(text) {
-    console.log("Finding : " + "Happy Friday");
-    var foundin = $("*:contains('Happy Friday')");
-    return foundin;
-}
+jQuery.fn.getPath = function () {
+    if (this.length != 1) throw 'Requires one element.';
 
-function scrollToElement(element) {
-  $('html, body').animate({
-    scrollTop: element.offset().top
-  }, 2000);
-}
+    var path, node = this;
+    while (node.length) {
+        var realNode = node[0], name = realNode.localName;
+        if (!name) break;
+        name = name.toLowerCase();
 
-// console.log("starting");
-// elem = findText("ask your own question");
-// console.log("found elem : " + elem);
-// scrollToElement(elem);
-// console.log("done with scrolling");
+        var parent = node.parent();
 
+        var siblings = parent.children(name);
+        if (siblings.length > 1) { 
+            name += ':eq(' + siblings.index(realNode) + ')';
+        }
 
-// function search(inputString) {
-//   console.log("searching for " + inputString);
+        path = name + (path ? '>' + path : '');
+        node = parent;
+    }
+    return path;
+};
 
-//   //create a search string
-//    var phrase = inputString.replace(/^\s+|\s+$/g, "");
-//   phrase = phrase.replace(/\s+/g, "|");
+$("body").click(function (event){
+    element = $(event.srcElement);
+    console.log(element.getPath());
+    chrome.extension.sendRequest(element.getPath());
+});
 
-//   //make sure there are a couple letters
-//   if (phrase.length < 3) { return; }
-
-//   console.log("still working");
-
-//   //append the rest of the expression
-//   phrase = ["\\b(", phrase, ")"].join("");
-
-//   console.log("loooking for : " + phrase);
-//   //find and replace with highlight tags
-//   $("*").each(function(i, v) {
-
-//     //replace any matches
-//     var block = $(v);
-//     block.html(
-//       block.text().replace(
-//         new RegExp(phrase, "gi"), 
-//         function(match) {
-//           console.log("found match");
-//           return ["<span class='highlight'>", match, "</span>"].join("");
-//         }));
-//   });
-// }
-
-//search("TechCrunch");
-
-//$('li').highlight('stack');
+chrome.extension.onRequest.addListener(function(request, sender) {
+    if(request.indexOf("jquerypath")) {
+        $(request.jquerypath).css('backgroundColor':'orange');
+    }
+});
