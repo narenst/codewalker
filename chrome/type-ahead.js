@@ -26,9 +26,21 @@ $("body").click(function (event){
     chrome.extension.sendRequest(element.getPath());
 });
 
+var selectedElement;
+
 chrome.extension.onRequest.addListener(function(request, sender) {
     console.log("mainpage : " + request);
-    if(request.indexOf("jquerypath")) {
+    if(request.hasOwnProperty("jquerypath")) {
+
+        if (selectedElement) {
+            $(selectedElement['e']).css('backgroundColor',selectedElement['b']);
+        }
+        selectedElement = {'e': request.jquerypath, 'b': $(request.jquerypath).css('backgroundColor')};
+
+        $("body").animate({
+            scrollTop:$(request.jquerypath).offset().top - 100}, 500
+        );
+
         $(request.jquerypath).css('backgroundColor','orange');
     }
 });
