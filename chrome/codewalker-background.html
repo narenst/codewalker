@@ -1,20 +1,21 @@
 <html>
   <script src='lib/jquery-1.7.1.min.js'></script>
   <script src='lib/bootstrap.min.js'></script>
-  <script src="http://localhost:9000/socket.io/socket.io.js"></script>
+  <script src="http://vivid-rain-8658.herokuapp.com/socket.io/socket.io.js"></script>
 
   <script>
 
-    function goToUrl(url) {
-      console.log("going to www.google.com");
-       chrome.tabs.executeScript(
-         null, {code:"window.location.href='" + url + "'"}
-       );
+    function goToUrl(destinationUrl) {
+      console.log("going to " + destinationUrl);
+      chrome.tabs.getSelected(null, function (tab) {
+        chrome.tabs.update(tab.id, {url: destinationUrl});
+      });
     }
 
-    var socket = io.connect('http://localhost:9000');
+    var socket = io.connect('http://vivid-rain-8658.herokuapp.com');
     var masterSelected = false;
     var imMaster = false;
+    var syncText = "";
 
     // on connection to server
     socket.on('connect', function(){
@@ -24,8 +25,12 @@
     // update from server
     socket.on('update', function (username, data) {
       console.log("receiving data " + data);
-      //goToUrl(data);
-      $('#synctext').val(data);
+
+      //padawan
+      if (masterSelected && !imMaster) {
+        goToUrl(data);
+      }
+      syncText = data;
     });
 
     // master chosen
@@ -42,16 +47,34 @@
       socket.emit('sendupdate', data);
     }
 
-    function masterSelected() {
+    function startWatchingBrowser() {
+
+    }
+
+    function masterSelectedFromPopUp() {
       console.log("selected master");
       imMaster = true;
       socket.emit('selectMaster', "dummy");
+      startWatchingBrowser();
     }
 
-    function padawanSelected() {
+    function padawanSelectedFromPopUp() {
       console.log("cleared master");
       imMaster = false;
       socket.emit('clearMaster', "dummy");
+      stopWatchingBrowser();
+    }
+
+    function getMasterSelected() {
+      return masterSelected;
+    }
+
+    function getImMaster() {
+      return imMaster;
+    }
+
+    function getSyncText() {
+      return syncText;
     }
   </script>
 </html>

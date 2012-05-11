@@ -52,7 +52,7 @@ io.sockets.on('connection', function (socket) {
       master = socket;
       broadcastMasterStatus();
    }
-
+   
    function clearMaster() {
       master = null;
       masterSelected = false;

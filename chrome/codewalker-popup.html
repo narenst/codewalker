@@ -31,35 +31,14 @@
   <script src="http://localhost:9000/socket.io/socket.io.js"></script>
 
   <script>
-    var accessToken;
 
-    function goToUrl() {
-      console.log("going to www.google.com");
-       chrome.tabs.executeScript(
-         null, {code:"window.location.href='http://www.google.com'"}
-       );
-    }
+    function renderView() {
+      background = chrome.extension.getBackgroundPage();
+      var isMasterSelected = background.getMasterSelected();
+      var imMaster = background.getImMaster();
+      var syncText = background.getSyncText();
 
-    var socket = io.connect('http://localhost:9000');
-    var masterSelected = false;
-    var imMaster = false;
-
-    // on connection to server
-    socket.on('connect', function(){
-      console.log("connected to nodejs server");
-    });
-
-    // update from server
-    socket.on('update', function (username, data) {
-      console.log("receiving data " + data);
-      $('#synctext').val(data);
-    });
-
-    // master chosen
-    socket.on('masterSelected', function (isMasterSelected) {
-      console.log("incoming master selected message");
-      $('#status').html('masterselected : ' + isMasterSelected);
-      imMaster = $('#type_master').attr('checked');
+      $('#synctext').val(syncText);
 
       if (isMasterSelected && !imMaster) {
         //im the padawan
@@ -77,23 +56,27 @@
       } else {
         $('#sync').attr('disabled', true);
       }
-    });
 
-    //send to server
-    $('#sync').click(function() {
-      console.log("sending data " + $('#synctext').val());
-      socket.emit('sendupdate', $('#synctext').val());
-    });
+      //fix checked 
+      if (isMasterSelected) {
+        $('#type_master').attr('checked','');
+      }
 
-    $('#type_master').click(function() {
-      console.log("selected master");
-      socket.emit('selectMaster', "dummy");
-    });
+      //send to server
+      $('#sync').click(function() {
+        background.sendUpdateData($('#synctext').val());
+      });
 
-    $('#type_padawan').click(function() {
-      console.log("cleared master");
-      socket.emit('clearMaster', "dummy");
-    });
+      $('#type_master').click(function() {
+        background.masterSelectedFromPopUp();
+      });
+
+      $('#type_padawan').click(function() {
+        background.padawanSelectedFromPopUp();
+      });
+    }
+
+    renderView();
 
     /*
     function getTokenFromSimperium() {
