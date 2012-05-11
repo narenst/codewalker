@@ -1,0 +1,6 @@
+curl -H 'X-Simperium-API-Key:d06073458ad64f288e85a260338def7b' -d '{"username":"demo@locationlabs.com", "password":"demo"}' \
+    https://auth.simperium.com/1/fork-programs-2e6/authorize/
+
+
+
+- create user / login user can be done in the background.html
