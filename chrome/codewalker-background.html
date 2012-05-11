@@ -16,6 +16,7 @@
     var masterSelected = false;
     var imMaster = false;
     var syncText = "";
+    var lastKnownUrl = "";
 
     // on connection to server
     socket.on('connect', function(){
@@ -49,7 +50,18 @@
     }
 
     function startWatchingBrowser() {
+      chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+        // console.log(''
+        //       + ' window: ' + tab.windowId
+        //       + ' tab: '    + tab.id
+        //       + ' index: '  + tab.index
+        //       + ' url: '    + tab.url);
 
+        if(tab.url != lastKnownUrl) {
+          lastKnownUrl = tab.url;
+          sendUpdateData(lastKnownUrl);
+        }
+        });
     }
 
     function masterSelectedFromPopUp() {
