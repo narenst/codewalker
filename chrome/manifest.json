@@ -6,12 +6,12 @@
       "128":"images/128.png"
    },
    "permissions":[
-      "tabs", "http://*/*", "https://*/*", "https://api.simperium.com/sock/info"
+      "tabs", "http://*/*", "https://*/*", "contextMenus"
    ],
    "content_scripts": [{
-       "matches":["https://*/*"],
-       "css": ["css/bootstrap.min.css"],
-       "js": ["lib/jquery-1.7.1.min.js", "lib/bootstrap.min.js"]
+       "matches":["http://*/*", "https://*/*", "ftp://*/*", "file://*/*"],
+       "js": ["lib/jquery-1.7.1.min.js"],
+       "run_at": "document_start"
    }],
    "browser_action": {
          "default_title": "Codewalker",

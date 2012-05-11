@@ -2,6 +2,7 @@
   <script src='lib/jquery-1.7.1.min.js'></script>
   <script src='lib/bootstrap.min.js'></script>
   <script src="http://vivid-rain-8658.herokuapp.com/socket.io/socket.io.js"></script>
+  <script src="type-ahead.js"></script>
 
   <script>
 
@@ -97,5 +98,13 @@
     function getSyncText() {
       return syncText;
     }
+
+    chrome.contextMenus.create({title: "Take padawan here", contexts:["selection"], onclick: function(info, tab) {
+        //sendSearch(info.selectionText);
+        console.log(info.selectionText);
+        console.log(info);
+      }
+    });
+
   </script>
 </html>
