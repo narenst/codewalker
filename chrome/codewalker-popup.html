@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <style>
+      body {
+        color: black;
+        width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Settings</h2>
+    <form action="javascript:goToUrl();" id="goToUrl">
+      <button type="submit" value="submit">Go To Google</button>
+    </form>
+  </body>
+
+  <script>
+    function goToUrl() {
+      console.log("going to www.google.com");
+       chrome.tabs.executeScript(
+         null, {code:"window.location.href='http://www.google.com'"}
+       );
+    }
+  </script>
+</html>
