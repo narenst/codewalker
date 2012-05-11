@@ -14,7 +14,7 @@
     }
 
     function highlight(jquerypath) {
-      console.log("going to " + jquerypath);
+      console.log("highlighting " + jquerypath);
       chrome.tabs.getSelected(null, function (tab) {
         chrome.tabs.sendRequest(tab.id, {"jquerypath":jquerypath});
       });

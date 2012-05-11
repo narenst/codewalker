@@ -27,7 +27,8 @@ $("body").click(function (event){
 });
 
 chrome.extension.onRequest.addListener(function(request, sender) {
+    console.log("mainpage : " + request);
     if(request.indexOf("jquerypath")) {
-        $(request.jquerypath).css('backgroundColor':'orange');
+        $(request.jquerypath).css('backgroundColor','orange');
     }
 });
