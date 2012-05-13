@@ -1,8 +1,7 @@
-This is a Chrome Plugin to help two users look at same piece of code. One browser will become the 'master' and the other a 'slave'.
+CodeWalkr is a chrome plugin that will help in code walk-through over a browser. It is very simple to download and use. 
 
-1. Once a session is setup, the slave loses the control of the browser tab.
-2. Any url that the master goes to is sent to the slave and the page is opened there.
-3. Also the top of the page is shared (so they both look at the same part of the page)
-4. Any text highlighted is also sent across.
-
-These are the starting goals of the hack. Time permitting, more can be done.
+1. Download the plugin
+2. Create a room and share the room id to participants.
+3. One of the users selects 'master' mode.
+4. From now on, any page the master visits will automatically be loaded in everyone else's browser.
+5. When the master user clicks on any part of the page, everyone else is taken to that part of the page with the text highlighted.
