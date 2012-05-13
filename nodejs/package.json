@@ -1,9 +1,0 @@
-{
-  "name": "codewalker",
-  "description": "socket.io codewalker server",
-  "version": "0.1.0",
-  "dependencies": {
-   "express": "2.5.1",
-   "socket.io": "0.9.0"
-  }
-}
