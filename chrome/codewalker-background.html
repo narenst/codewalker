@@ -37,13 +37,22 @@
 
       //padawan
       if (masterSelected && !imMaster) {
-        if (data.indexOf("sleepydragon") != -1) {
-          data = data.replace("sleepydragon:", "");
-          console.log(data);
-          highlight(data);
-        } else {
+        jsonData = JSON.parse(data);
+        console.log(jsonData.data);
+        if (jsonData.type == "div") {
+          highlight(jsonData.data);
+        } else if (jsonData.type == "url") {
           goToUrl(data);
+        } else {
+          console.log("received invalid data type");
         }
+        // if (data.indexOf("sleepydragon") != -1) {
+        //   data = data.replace("sleepydragon:", "");
+        //   console.log(data);
+        //   highlight(data);
+        // } else {
+        //   goToUrl(data);
+        // }
       }
       syncText = data;
     });
@@ -51,8 +60,6 @@
     // master chosen
     socket.on('masterSelected', function (isMasterSelected) {
       console.log("incoming master selected message");
-      //$('#status').html('masterselected : ' + isMasterSelected);
-      //imMaster = $('#type_master').attr('checked');
       masterSelected = isMasterSelected;
       renderPopUp();
     });
@@ -64,21 +71,26 @@
     }
 
     function startWatchingBrowser() {
-      chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-        // console.log(''
-        //       + ' window: ' + tab.windowId
-        //       + ' tab: '    + tab.id
-        //       + ' index: '  + tab.index
-        //       + ' url: '    + tab.url);
 
-        if(tab.url != lastKnownUrl) {
-          lastKnownUrl = tab.url;
-          sendUpdateData(lastKnownUrl);
-        }
+        chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+          if(tab.url != lastKnownUrl) {
+            lastKnownUrl = tab.url;
+            //build a json object
+            var jsonObject = {};
+            jsonObject.type = "url";
+            jsonObject.data = lastKnownUrl;
+
+            sendUpdateData(JSON.stringify(jsonObject));
+          }
         });
 
         chrome.extension.onRequest.addListener(function(request, sender) {
-          sendUpdateData("sleepydragon:" + request);
+          //build a json object
+          var jsonObject = {};
+          jsonObject.type = "div";
+          jsonObject.data = request;
+
+          sendUpdateData(JSON.stringify(jsonObject));
         });
     }
 
@@ -115,15 +127,6 @@
     function getSyncText() {
       return syncText;
     }
-
-    // chrome.contextMenus.create({title: "Take padawan here", contexts:["selection"], onclick: function(info, tab) {
-    //     //sendSearch(info.selectionText);
-    //     console.log(info.selectionText);
-    //     console.log(info);
-    //   }
-    // });
-
-    // console.log("done");
 
   </script>
 </html>

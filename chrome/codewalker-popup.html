@@ -1,3 +1,4 @@
+<!DOCTYPE HTML>
 <html>
   <head>
     <style>
@@ -6,21 +7,34 @@
         width: 300px;
       }
     </style>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
   </head>
   
   <body>
-    <h2>Settings</h2>
+    <h3>Secure code</h3>
 
+    <!--
     <input class="input-large" type="text" id="synctext" placeholder="Text to sync"/>
     <button type="submit" value="submit" id="sync">Sync</button>
-
+    
     <br><br>
+    -->
 
-    <input type="radio" name="type" value="Master" id="type_master"/> Jedi
-    <input type="radio" name="type" value="Padawan" id="type_padawan" checked="checked"/> Padawan
-    <br>
+    <form class="well form-inline">
+      <input type="text" class="input-small" placeholder="code">
+      <button type="submit" class="btn">Generate/Join</button>
+    </form>
 
-    <h4 id="status"></h4>
+    <h3>Pick your role</h3>
+    <form class="well form-inline">
+      <input type="radio" name="type" value="Master" id="type_master"/> Presenter
+      <input type="radio" name="type" value="Padawan" id="type_padawan" checked="checked"/> Listener
+    </form>
+
+    <h4>Status</h4>
+    <form class="well form-inline">
+      <label>TBD</label>
+    </form>
   </body>
 
   <script src='lib/jquery-1.7.1.min.js'></script>
