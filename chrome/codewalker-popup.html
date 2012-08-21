@@ -13,16 +13,9 @@
   <body>
     <h3>Secure code</h3>
 
-    <!--
-    <input class="input-large" type="text" id="synctext" placeholder="Text to sync"/>
-    <button type="submit" value="submit" id="sync">Sync</button>
-    
-    <br><br>
-    -->
-
     <form class="well form-inline">
-      <input type="text" class="input-small" placeholder="code">
-      <button type="submit" class="btn">Generate/Join</button>
+      <input type="text" class="input-small" placeholder="code" id="code">
+      <button type="submit" class="btn" id="join">Generate/Join</button>
     </form>
 
     <h3>Pick your role</h3>
@@ -33,25 +26,23 @@
 
     <h4>Status</h4>
     <form class="well form-inline">
-      <label>TBD</label>
+      <label id="status">TBD</label>
     </form>
   </body>
 
   <script src='lib/jquery-1.7.1.min.js'></script>
   <script src='lib/bootstrap.min.js'></script>
-  <script src="http://localhost:9000/socket.io/socket.io.js"></script>
 
   <script>
 
-    function renderView() {
+    function renderView(state) {
+      console.log("rendering view for : " + state);
       background = chrome.extension.getBackgroundPage();
-      var isMasterSelected = background.getMasterSelected();
-      var imMaster = background.getImMaster();
       var syncText = background.getSyncText();
 
       $('#synctext').val(syncText);
 
-      if (isMasterSelected && !imMaster) {
+      if (!state == "joined") {
         //im the padawan
         $('#type_master').attr('disabled', true);
         $('#type_padawan').attr('disabled', true);
@@ -62,25 +53,23 @@
       }
 
       //start syncing
-      if (isMasterSelected && imMaster) {
-        $('#sync').attr('disabled', false);
-      } else {
-        $('#sync').attr('disabled', true);
-      }
+      // if (state == "master") {
+      //   $('#sync').attr('disabled', false);
+      // } else {
+      //   $('#sync').attr('disabled', true);
+      // }
 
       //fix checked 
-      if (isMasterSelected) {
-        if (imMaster) {
-          $('#type_master').attr('checked','checked');
-        } else {
-          $('#type_padawan').attr('checked','checked');
-        }
+      if (state = "master") {
+        $('#type_master').attr('checked','checked');
+      } else {
+        $('#type_padawan').attr('checked','checked');
       }
 
       //send to server
-      $('#sync').click(function() {
-        background.sendUpdateData($('#synctext').val());
-      });
+      // $('#sync').click(function() {
+      //   background.sendUpdateData($('#synctext').val());
+      // });
 
       $('#type_master').click(function() {
         background.masterSelectedFromPopUp();
@@ -90,54 +79,10 @@
         background.padawanSelectedFromPopUp();
       });
 
+      console.log("setting status to : " + state);
+      $('#status').html(state);
     }
 
-    renderView();
-
-    /*
-    function getTokenFromSimperium() {
-      authorizeUrl = "https://auth.simperium.com/1/fork-programs-2e6/authorize/";
-      $.ajax(
-        {
-          type:"POST",
-          url:authorizeUrl,
-          data:"username=demo@locationlabs.com&password=demo",
-          headers:{"X-Simperium-API-Key": "d06073458ad64f288e85a260338def7b"},
-          success : function(result) {
-            console.log("result : " + result);
-            json = JSON.parse(result);
-            $('#status').html("simperium token : " + json.access_token);
-            return json.access_token;
-          },
-          error:function (xhr, ajaxOptions, thrownError){
-            $('#status').html("failure : " + xhr.responseText);
-            console.log(xhr.status);
-            console.log(xhr.responseText);
-          }
-        }
-      );
-    }
-
-    accessToken = getTokenFromSimperium();
-
-    var simperium = new Simperium('fork-programs-2e6', { token : accessToken});
-    var bucket = simperium.bucket('status');
-
-    bucket.on('notify', function(id, data) {
-        console.log("object " + id + " was updated!");
-        $('#status').html("object " + id + " was updated!");
-        console.log("new data is:");
-        console.log(data);
-        $('#synctext').val(data);
-    });
-
-    bucket.on('local', function(id) {
-        console.log("request for local state for object " + id + " received");
-        $('#status').html("request for local state for object " + id + " received");
-        return $('#synctext').val();
-    });
-
-    bucket.start();
-    */
+    renderView("connecting");
   </script>
 </html>

@@ -1,0 +1,93 @@
+<html>
+  <head>
+    <style>
+      body {
+        color: black;
+        width: 300px;
+      }
+    </style>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  
+  <body>
+    <h3>Test Framework</h3>
+
+      <input class="input-large" type="text" id="roomid" placeholder="roomid"/>
+      <button class="btn" id="join">Join</button>
+      <button class="btn" id="leave">Leave</button><br>
+      <button class="btn" id="master">Master</button>
+      <button class="btn" id="slave">Slave</button><br>
+      <input class="input-large" type="text" id="data" placeholder="data"/>
+      <button class="btn" id="update">Send Update</button>
+  </body>
+
+
+  <script src='lib/jquery-1.7.1.min.js'></script>
+  <script src='lib/bootstrap.min.js'></script>
+  <script src="http://vivid-rain-8658.herokuapp.com/socket.io/socket.io.js"></script>
+
+  <script>
+
+    var socket = io.connect('http://vivid-rain-8658.herokuapp.com');
+
+    // on connection to server
+    socket.on('connect', function(){
+      console.log("connecting to server");
+    });
+
+    socket.on('success', function(operation){
+      console.log("success from server for : " + operation);
+    });
+
+    socket.on('failure', function(operation, reason){
+      console.log("failure from server for : " + operation + " reason : " + reason);
+    });
+
+    // master update from server
+    socket.on('masterUpdate', function (data) {
+      console.log("masterUpdate : " + data);
+    });
+
+    $('#join').click(function() {
+      socket.emit('join', $('#roomid').val());
+      console.log('sending join : ' + $('#roomid').val());
+    });
+
+    $('#leave').click(function() {
+      socket.emit('leave');
+      console.log('sending leave');
+    });
+
+    $('#master').click(function() {
+      socket.emit('master', 'true');
+      console.log('sending master : true');
+    });
+
+    $('#slave').click(function() {
+      socket.emit('master', 'false');
+      console.log('sending master : false');
+    });
+
+    $('#update').click(function() {
+      socket.emit('update', $('#data').val());
+      console.log('sending update with data : ' + $('#data').val());
+    });
+
+    // update from server
+    socket.on('update', function (data) {
+      console.log("receiving data " + data);
+    });
+
+    // master chosen
+    socket.on('masterSelected', function (isMasterSelected) {
+      console.log("incoming master selected message");
+    });
+
+    //send to server
+    function sendUpdateData(data) {
+      console.log("sending data : " + data);
+      socket.emit('sendupdate', data);
+    }
+
+  </script>
+</html>

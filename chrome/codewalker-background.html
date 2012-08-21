@@ -6,6 +6,25 @@
 
   <script>
 
+    var server = "http://vivid-rain-8658.herokuapp.com" //"http://localhost:9000"
+    var socket = io.connect(server);
+    console.log("connecting to server");
+    
+    var masterSelected = false;
+    var imMaster = false;
+    var syncText = "";
+    var lastKnownUrl = "";
+    stateEnum = {
+      NEW : "new",
+      CONNECTED : "connected",
+      JOINED : "joined",
+      MASTER : "master",
+      FOLLOWER : "follower",
+      UNKNOWN : "unknown"
+    }
+    var currentState = stateEnum.UNKNOWN;
+    var currentRoomId;
+
     function goToUrl(destinationUrl) {
       console.log("going to " + destinationUrl);
       chrome.tabs.getSelected(null, function (tab) {
@@ -20,19 +39,40 @@
       });
     }
 
-    var socket = io.connect('http://vivid-rain-8658.herokuapp.com');
-    var masterSelected = false;
-    var imMaster = false;
-    var syncText = "";
-    var lastKnownUrl = "";
-
     // on connection to server
     socket.on('connect', function(){
-      console.log("connected to nodejs server");
+      console.log("connected to server");
+      currentState = stateEnum.CONNECTED;
+      renderPopUp(currentState);
     });
 
+    socket.on('success', function(operation) {
+      console.log("success for operation : " + operation);
+      if (operation == "connect") {
+        currentState = stateEnum.CONNECTED;
+      } else if (operation == "join") {
+        currentState = stateEnum.JOINED;
+      } else if (operation == "leave") {
+        currentState = stateEnum.CONNECTED;
+      } else if (operation == "master") {
+        if (imMaster) {
+          currentState = stateEnum.MASTER;
+          startWatchingBrowser();   
+        } else {
+          currentState = stateEnum.JOINED;
+          stopWatchingBrowser();   
+        }
+      }
+      renderPopUp(currentState);
+    });
+
+    socket.on('failure', function(operation) {
+      console.log("failure for operation : " + operation);
+    });
+
+
     // update from server
-    socket.on('update', function (username, data) {
+    socket.on('update', function (data) {
       console.log("receiving data " + data);
 
       //padawan
@@ -58,10 +98,19 @@
     });
 
     // master chosen
-    socket.on('masterSelected', function (isMasterSelected) {
-      console.log("incoming master selected message");
-      masterSelected = isMasterSelected;
-      renderPopUp();
+    socket.on('masterUpdate', function (data) {
+      console.log("incoming masterUpdate : " + data);
+      jsonData = JSON.parse(data);
+      masterSelected = jsonData.isMasterSelected;
+      participants = jsonData.participants;
+      if (masterSelected && !imMaster) {
+          currentState = stateEnum.FOLLOWER;
+      } 
+
+      if (!masterSelected) {
+          currentState = stateEnum.CONNECTED;
+      }
+      renderPopUp(currentState);
     });
 
     //send to server
@@ -95,24 +144,34 @@
     }
 
     function masterSelectedFromPopUp() {
-      console.log("selected master");
+      console.log("selecting master");
+      socket.emit('master', "true");
       imMaster = true;
-      socket.emit('selectMaster', "dummy");
-      startWatchingBrowser();
     }
 
     function padawanSelectedFromPopUp() {
-      console.log("cleared master");
+      console.log("selecting padawan");
+      socket.emit('master', "false");
       imMaster = false;
-      socket.emit('clearMaster', "dummy");
-      stopWatchingBrowser();
     }
 
-    function renderPopUp() {
+    function joinRoomSelected(roomId) {
+      console.log("joining room : " + roomId);
+      currentRoomId = roomId;
+      socket.emit('join', roomId);
+    }
+
+    function leaveRoomSelected() {
+      console.log("leaving room : " + currentRoomId);
+      socket.emit('leave');
+    }
+
+    function renderPopUp(state) {
+      console.log("rendering popup for state : " + state);
       var popups = chrome.extension.getViews({type: "popup"});
       if (popups.length != 0) {
         var popup = popups[0];
-        popup.renderView();
+        popup.renderView(state);
       }
     }
 
