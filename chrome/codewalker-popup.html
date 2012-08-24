@@ -15,7 +15,8 @@
 
     <form class="well form-inline">
       <input type="text" class="input-small" placeholder="code" id="code">
-      <button type="submit" class="btn" id="join">Generate/Join</button>
+      <button type="button" class="btn" id="generate">Generate</button>
+      <button type="button" class="btn" id="join">Join</button>
     </form>
 
     <h3>Pick your role</h3>
@@ -34,13 +35,28 @@
   <script src='lib/bootstrap.min.js'></script>
 
   <script>
+    //background page
+    backgroundPage = chrome.extension.getBackgroundPage();
+    randomRoomId = "";
+
+    //generate a random 5 digit room id
+    $('#generate').click(function() {
+      randomRoomId = Math.floor(Math.random() * 89999 + 10000);
+      console.log("room Id generated : " + randomRoomId);
+      $('#code').val(randomRoomId);
+    });
+
+    //join the room Id
+    $('#join').click(function() {
+      console.log("joining room id : " + randomRoomId);
+      chrome.extension.getBackgroundPage().joinRoomSelected(randomRoomId);
+    })
 
     function renderView(state) {
       console.log("rendering view for : " + state);
       background = chrome.extension.getBackgroundPage();
       var syncText = background.getSyncText();
-
-      $('#synctext').val(syncText);
+      console.log("Sync text : " + syncText);
 
       if (!state == "joined") {
         //im the padawan
@@ -60,7 +76,7 @@
       // }
 
       //fix checked 
-      if (state = "master") {
+      if (state == "master") {
         $('#type_master').attr('checked','checked');
       } else {
         $('#type_padawan').attr('checked','checked');
@@ -83,6 +99,6 @@
       $('#status').html(state);
     }
 
-    renderView("connecting");
+    renderView(chrome.extension.getBackgroundPage().getCurrentState());
   </script>
 </html>

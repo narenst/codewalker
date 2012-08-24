@@ -25,6 +25,10 @@
     var currentState = stateEnum.UNKNOWN;
     var currentRoomId;
 
+    function getCurrentState() {
+      return currentState;
+    }
+
     function goToUrl(destinationUrl) {
       console.log("going to " + destinationUrl);
       chrome.tabs.getSelected(null, function (tab) {
@@ -103,12 +107,13 @@
       jsonData = JSON.parse(data);
       masterSelected = jsonData.isMasterSelected;
       participants = jsonData.participants;
+
       if (masterSelected && !imMaster) {
           currentState = stateEnum.FOLLOWER;
       } 
 
       if (!masterSelected) {
-          currentState = stateEnum.CONNECTED;
+          currentState = stateEnum.JOINED;
       }
       renderPopUp(currentState);
     });
@@ -120,27 +125,34 @@
     }
 
     function startWatchingBrowser() {
-
-        chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-          if(tab.url != lastKnownUrl) {
-            lastKnownUrl = tab.url;
-            //build a json object
-            var jsonObject = {};
-            jsonObject.type = "url";
-            jsonObject.data = lastKnownUrl;
-
-            sendUpdateData(JSON.stringify(jsonObject));
-          }
-        });
-
-        chrome.extension.onRequest.addListener(function(request, sender) {
+      chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+        if(tab.url != lastKnownUrl) {
+          lastKnownUrl = tab.url;
           //build a json object
           var jsonObject = {};
-          jsonObject.type = "div";
-          jsonObject.data = request;
+          jsonObject.type = "url";
+          jsonObject.data = lastKnownUrl;
 
+          if (currentState == stateEnum.MASTER) {
+            sendUpdateData(JSON.stringify(jsonObject));
+          }
+        }
+      });
+
+      chrome.extension.onRequest.addListener(function(request, sender) {
+        //build a json object
+        var jsonObject = {};
+        jsonObject.type = "div";
+        jsonObject.data = request;
+
+        if (currentState == stateEnum.MASTER) {
           sendUpdateData(JSON.stringify(jsonObject));
-        });
+        }
+      });
+    }
+
+    function stopWatchingBrowser() {
+      chrome.tabs.onUpdated.removeListener(arguments.callee);
     }
 
     function masterSelectedFromPopUp() {
@@ -166,9 +178,10 @@
       socket.emit('leave');
     }
 
-    function renderPopUp(state) {
+    function renderPopUp(state) {//
       console.log("rendering popup for state : " + state);
       var popups = chrome.extension.getViews({type: "popup"});
+      console.log("popups size : " + popups.length)
       if (popups.length != 0) {
         var popup = popups[0];
         popup.renderView(state);
