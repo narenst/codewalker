@@ -29,6 +29,10 @@
       return currentState;
     }
 
+    function getCurrentRoomId() {
+      return currentRoomId;
+    }
+
     function goToUrl(destinationUrl) {
       console.log("going to " + destinationUrl);
       chrome.tabs.getSelected(null, function (tab) {
@@ -175,6 +179,7 @@
 
     function leaveRoomSelected() {
       console.log("leaving room : " + currentRoomId);
+      currentRoomId = "";
       socket.emit('leave');
     }
 

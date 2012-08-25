@@ -49,7 +49,7 @@
     $('#join').click(function() {
       roomId = $('#code').val();
       console.log("joining room id : " + roomId);
-      chrome.extension.getBackgroundPage().joinRoomSelected(randomRoomId);
+      chrome.extension.getBackgroundPage().joinRoomSelected(roomId);
     })
 
     function renderView(state) {
@@ -97,6 +97,7 @@
 
       console.log("setting status to : " + state);
       $('#status').html(state);
+      $('#code').val(background.getCurrentRoomId());
     }
 
     renderView(chrome.extension.getBackgroundPage().getCurrentState());
