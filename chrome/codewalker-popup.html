@@ -37,7 +37,6 @@
   <script>
     //background page
     backgroundPage = chrome.extension.getBackgroundPage();
-    randomRoomId = "";
 
     //generate a random 5 digit room id
     $('#generate').click(function() {
@@ -48,7 +47,8 @@
 
     //join the room Id
     $('#join').click(function() {
-      console.log("joining room id : " + randomRoomId);
+      roomId = $('#code').val();
+      console.log("joining room id : " + roomId);
       chrome.extension.getBackgroundPage().joinRoomSelected(randomRoomId);
     })
 
